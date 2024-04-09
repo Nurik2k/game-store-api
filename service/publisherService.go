@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"game-store-api/database"
 )
 
@@ -10,73 +9,58 @@ type PublisherSerice struct {
 }
 
 type IPublisherService interface {
-	GetPublishers() ([]byte, error)
-	GetPublisher(id string) ([]byte, error)
-	CreatePublisher(publisher database.Publisher) ([]byte, error)
-	UpdatePublisher(publisher database.Publisher) ([]byte, error)
-	DeletePublisher(id string) ([]byte, error)
+	GetPublishers() ([]database.Publisher, error)
+	GetPublisher(id string) (database.Publisher, error)
+	CreatePublisher(publisher database.Publisher) (string, error)
+	UpdatePublisher(publisher database.Publisher) (string, error)
+	DeletePublisher(id string) (string, error)
 }
 
 func NewPublisherService(publisher database.IPublisher) *PublisherSerice {
 	return &PublisherSerice{publisher: publisher}
 }
 
-func (s *PublisherSerice) GetPublishers() ([]byte, error) {
+func (s *PublisherSerice) GetPublishers() ([]database.Publisher, error) {
 	publishers, err := s.publisher.GetPublishers()
 	if err != nil {
 		return nil, err
 	}
 
-	jsonM, err := json.Marshal(publishers)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return publishers, nil
 }
 
-func (s *PublisherSerice) GetPublisher(id string) ([]byte, error) {
+func (s *PublisherSerice) GetPublisher(id string) (database.Publisher, error) {
 	publisher, err := s.publisher.GetPublisher(id)
 	if err != nil {
-		return nil, err
-	}
-	
-	jsonM, err := json.Marshal(publisher)
-	if err != nil {
-		return nil, err
+		return publisher, err
 	}
 
-	return jsonM, nil
+	return publisher, nil
 }
 
-func (s *PublisherSerice) CreatePublisher(publisher database.Publisher) ([]byte, error) {
+func (s *PublisherSerice) CreatePublisher(publisher database.Publisher) (string, error) {
 	err := s.publisher.CreatePublisher(publisher)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Publisher added"), nil
+	return "Publisher added", nil
 }
 
-func (s *PublisherSerice) UpdatePublisher(publisher database.Publisher) ([]byte, error) {
+func (s *PublisherSerice) UpdatePublisher(publisher database.Publisher) (string, error) {
 	err := s.publisher.UpdatePublisher(publisher)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	jsonM, err := json.Marshal(publisher)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return "Publisher updated", nil
 }
 
-func (s *PublisherSerice) DeletePublisher(id string) ([]byte, error) {
+func (s *PublisherSerice) DeletePublisher(id string) (string, error) {
 	err := s.publisher.DeletePublisher(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Publisher deleted"), nil
+	return "Publisher deleted", nil
 }

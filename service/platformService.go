@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"game-store-api/database"
 )
 
@@ -10,68 +9,58 @@ type PlatformService struct {
 }
 
 type IPlatformService interface {
-	GetPlatforms() ([]byte, error)
-	GetPlatform(id string) ([]byte, error)
-	CreatePlatform(platform database.Platform) ([]byte, error)
-	UpdatePlatform(platform database.Platform) ([]byte, error)
-	DeletePlatform(id string) ([]byte, error)
+	GetPlatforms() ([]database.Platform, error)
+	GetPlatform(id string) (database.Platform, error)
+	CreatePlatform(platform database.Platform) (string, error)
+	UpdatePlatform(platform database.Platform) (string, error)
+	DeletePlatform(id string) (string, error)
 }
 
 func NewPlatformService(platform database.IPlatform) *PlatformService {
 	return &PlatformService{platform: platform}
 }
 
-func (s *PlatformService) GetPlatforms() ([]byte, error) {
+func (s *PlatformService) GetPlatforms() ([]database.Platform, error) {
 	platforms, err := s.platform.GetPlatforms()
 	if err != nil {
 		return nil, err
 	}
 
-	jsonM, err := json.Marshal(platforms)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return platforms, nil
 }
 
-func (s *PlatformService) GetPlatform(id string) ([]byte, error) {
+func (s *PlatformService) GetPlatform(id string) (database.Platform, error) {
 	platform, err := s.platform.GetPlatform(id)
 	if err != nil {
-		return nil, err
+		return platform, err
 	}
 
-	jsonM, err := json.Marshal(platform)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return platform, nil
 }
 
-func (s *PlatformService) CreatePlatform(platform database.Platform) ([]byte, error) {
+func (s *PlatformService) CreatePlatform(platform database.Platform) (string, error) {
 	err := s.platform.CreatePlatform(platform)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Platform created"), nil
+	return "Platform created", nil
 }
 
-func (s *PlatformService) UpdatePlatform(platform database.Platform) ([]byte, error) {
+func (s *PlatformService) UpdatePlatform(platform database.Platform) (string, error) {
 	err := s.platform.UpdatePlatform(platform)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Platform updated"), nil
+	return"Platform updated", nil
 }
 
-func (s *PlatformService) DeletePlatform(id string) ([]byte, error) {
+func (s *PlatformService) DeletePlatform(id string) (string, error) {
 	err := s.platform.DeletePlatform(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Platform deleted"), nil
+	return "Platform deleted", nil
 }

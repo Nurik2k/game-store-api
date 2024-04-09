@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"game-store-api/database"
 )
 
@@ -10,67 +9,57 @@ type ReviewService struct {
 }
 
 type IReviewService interface {
-	GetReviews() ([]byte, error)
-	GetReview(id string) ([]byte, error)
-	CreateReview(review database.Review) ([]byte, error)
-	UpdateReview(review database.Review) ([]byte, error)
-	DeleteReview(id string) ([]byte, error)
+	GetReviews() ([]database.Review, error)
+	GetReview(id string) (database.Review, error)
+	CreateReview(review database.Review) (string, error)
+	UpdateReview(review database.Review) (string, error)
+	DeleteReview(id string) (string, error)
 }
 
 func NewReviewService(review database.IReview) *ReviewService {
 	return &ReviewService{review: review}
 }
 
-func (s *ReviewService) GetReviews() ([]byte, error) {
+func (s *ReviewService) GetReviews() ([]database.Review, error) {
 	reviews, err := s.review.GetReviews()
 	if err != nil {
 		return nil, err
 	}
 
-	jsonM, err := json.Marshal(reviews)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return reviews, nil
 }
 
-func (s *ReviewService) GetReview(id string) ([]byte, error) {
+func (s *ReviewService) GetReview(id string) (database.Review, error) {
 	review, err := s.review.GetReview(id)
 	if err != nil {
-		return nil, err
+		return review, err
 	}
 
-	jsonM, err := json.Marshal(review)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return review, nil
 }
-func (s *ReviewService) CreateReview(review database.Review) ([]byte, error) {
+func (s *ReviewService) CreateReview(review database.Review) (string, error) {
 	err := s.review.CreateReview(review)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Review created"), nil
+	return "Review created", nil
 }
 
-func (s *ReviewService) UpdateReview(review database.Review) ([]byte, error) {
+func (s *ReviewService) UpdateReview(review database.Review) (string, error) {
 	err := s.review.UpdateReview(review)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Review updated"), nil
+	return "Review updated", nil
 }
 
-func (s *ReviewService) DeleteReview(id string) ([]byte, error) {
+func (s *ReviewService) DeleteReview(id string) (string, error) {
 	err := s.review.DeleteReview(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Review deleted"), nil
+	return "Review deleted", nil
 }

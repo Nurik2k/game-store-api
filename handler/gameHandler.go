@@ -20,22 +20,13 @@ func NewGameHandler(game *service.GameSerice) *GameHandler {
 func (g *GameHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/games" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
-
 	games, err := g.game.GetGames()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsoM, err := json.Marshal(games)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,26 +34,11 @@ func (g *GameHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsoM)
 }
 
 func (g *GameHandler) GetGame(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/game/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 
@@ -71,10 +47,16 @@ func (g *GameHandler) GetGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(game)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(game)
+	w.Write(jsonM)
 }
 
 
@@ -82,21 +64,6 @@ func (g *GameHandler) CreateGame(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/create-game" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "This request not POST!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var game database.Game
 	err := json.NewDecoder(r.Body).Decode(&game)
@@ -110,31 +77,22 @@ func (g *GameHandler) CreateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsoM, err := json.Marshal(games)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsoM)
 }
 
 func (g *GameHandler) UpdateGame(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/update-game/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodPut {
-		http.Error(w, "This request not PUT!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var game database.Game
 	err := json.NewDecoder(r.Body).Decode(&game)
@@ -148,29 +106,20 @@ func (g *GameHandler) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(games)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsonM)
 }
 
 func (g *GameHandler) DeleteGame(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/delete-game/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodDelete {
-		http.Error(w, "This request not DELETE!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 
@@ -179,10 +128,16 @@ func (g *GameHandler) DeleteGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(games)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsonM)
 }	
 
 func (g *GameHandler) gameRoutes() *mux.Router {

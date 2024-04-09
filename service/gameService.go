@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"game-store-api/database"
 )
 
@@ -10,82 +9,62 @@ type GameSerice struct {
 }
 
 type IGameService interface {
-	GetGames() ([]byte, error)
-	GetGame(id string) ([]byte, error)
-	CreateGame(game database.Game) ([]byte, error)
-	UpdateGame(game database.Game) ([]byte, error)
-	DeleteGame(id string) ([]byte, error)
+	GetGames() ([]database.Game, error)
+	GetGame(id string) (database.Game, error)
+	CreateGame(game database.Game) (database.Game, error)
+	UpdateGame(game database.Game) (string, error)
+	DeleteGame(id string) (string, error)
 }
 
 func NewGameService(game database.IGame) *GameSerice {
 	return &GameSerice{game: game}
 }
 
-func (s *GameSerice) GetGames() ([]byte, error) {
+func (s *GameSerice) GetGames() ([]database.Game, error) {
 	games, err := s.game.GetGames()
 	if err != nil {
 		return nil, err
 	}
 
-	jsonM, err := json.Marshal(games)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return games, nil
 }
 
-func (s *GameSerice) GetGame(id string) ([]byte, error) {
+func (s *GameSerice) GetGame(id string) (database.Game, error) {
 	game, err := s.game.GetGame(id)
 	if err != nil {
-		return nil, err
+		return game, err
 	}
 	
-	jsonM, err := json.Marshal(game)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return game, nil
 }
 
-func (s *GameSerice) CreateGame(game database.Game) ([]byte, error) {
+func (s *GameSerice) CreateGame(game database.Game) (database.Game, error) {
 	err := s.game.CreateGame(game)
 	if err != nil {
-		return nil, err
+		return game, err
 	}
 	
 	game, err = s.game.GetGame(game.ID)
 	if err != nil {
-		return nil, err
-	}
-		
-	jsonM, err := json.Marshal(game)
-	if err != nil {
-		return nil, err
+		return game, err
 	}
 
-	return jsonM, nil
+	return game, nil
 }
-func (s *GameSerice) UpdateGame(game database.Game) ([]byte, error) {
+func (s *GameSerice) UpdateGame(game database.Game) (string, error) {
 	err := s.game.UpdateGame(game)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	jsonM, err := json.Marshal(game)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return "game updated", nil
 }
 
-func (s *GameSerice) DeleteGame(id string) ([]byte, error) {
+func (s *GameSerice) DeleteGame(id string) (string, error) {
 	err := s.game.DeleteGame(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Game deleted"), nil
+	return "game deleted", nil
 }

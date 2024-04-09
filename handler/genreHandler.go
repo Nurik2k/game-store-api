@@ -20,22 +20,13 @@ func NewGenreHandler(genre *service.GenreService) *GenreHandler {
 func (g *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/genres" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
-
 	genres, err := g.genre.GetGenres()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonM, err := json.Marshal(genres)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,26 +34,11 @@ func (g *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(genres)
+	w.Write(jsonM)
 }
 
 func (g *GenreHandler) GetGenre(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/genre/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 
@@ -71,31 +47,22 @@ func (g *GenreHandler) GetGenre(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(genre)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(genre)
+	w.Write(jsonM)
 }
 
 func (g *GenreHandler) CreateGenre(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/create-genre" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "This request not POST!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var genre database.Genre
 	err := json.NewDecoder(r.Body).Decode(&genre)
@@ -109,40 +76,8 @@ func (g *GenreHandler) CreateGenre(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(genres)
-}
 
-func (g *GenreHandler) UpdateGenre(w http.ResponseWriter, r *http.Request) {
-	enableCors(w, r.Method)
-
-	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/update-genre/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}	
-
-	if r.Method != http.MethodPut {
-		http.Error(w, "This request not PUT!", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var genre database.Genre
-	err := r.Body.Close()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	genres, err := g.genre.UpdateGenre(genre)
+	jsonM, err := json.Marshal(genres)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -150,26 +85,40 @@ func (g *GenreHandler) UpdateGenre(w http.ResponseWriter, r *http.Request) {
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(genres)
+	w.Write(jsonM)
+}
+
+func (g *GenreHandler) UpdateGenre(w http.ResponseWriter, r *http.Request) {
+	enableCors(w, r.Method)
+
+	defer r.Body.Close()
+
+	err := r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var genre database.Genre
+	genres, err := g.genre.UpdateGenre(genre)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonM, err := json.Marshal(genres)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonM)
 }
 
 func (g *GenreHandler) DeleteGenre(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/delete-genre/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodDelete {
-		http.Error(w, "This request not DELETE!", http.StatusMethodNotAllowed)
-		return
-	}	
 
 	id := r.URL.Query().Get("id")
 
@@ -178,10 +127,16 @@ func (g *GenreHandler) DeleteGenre(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(genres)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(genres)
+	w.Write(jsonM)
 }
 
 func (g *GenreHandler) genreRoutes() *mux.Router {

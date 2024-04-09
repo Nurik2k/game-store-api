@@ -20,53 +20,29 @@ func NewFavoriteHandler(favorite *service.FavoriteService) *FavoriteHandler {
 func (h *FavoriteHandler) GetFavorites(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/favorite-games/{user_id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userID := r.URL.Query().Get("user_id")
 
-	games, err := h.favorite.GetFavoriteGamesByUser(userID)
+	favoriteGame, err := h.favorite.GetFavoriteGamesByUser(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
+	jsonM, err := json.Marshal(favoriteGame)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsonM)
 }
 
 func (h *FavoriteHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/add-favorite" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "This request not POST!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var favorite database.FavoriteGame
 	err := json.NewDecoder(r.Body).Decode(&favorite)
@@ -80,29 +56,20 @@ func (h *FavoriteHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(games)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsonM)
 }
 
 func (h *FavoriteHandler) DeleteFavorite(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/delete-favorite" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodDelete {
-		http.Error(w, "This request not DELETE!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 
@@ -111,10 +78,16 @@ func (h *FavoriteHandler) DeleteFavorite(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	jsonM, err := json.Marshal(games)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(games)
+	w.Write(jsonM)
 }
 
 func (h *FavoriteHandler) favoriteRoutes() *mux.Router {

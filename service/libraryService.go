@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"game-store-api/database"
 )
 
@@ -10,54 +9,49 @@ type LibraryService struct {
 }
 
 type ILibraryService interface {
-	GetLibraryByUser(userID string) ([]byte, error)
-	CreateLibrary(library database.Library) ([]byte, error)
-	AddGameToLibraryFromUser(library database.Library) ([]byte, error)
-	DeleteLibrary(id string) ([]byte, error)
+	GetLibraryByUser(userID string) ([]database.Library, error)
+	CreateLibrary(library database.Library) (string, error)
+	AddGameToLibraryFromUser(library database.Library) (string, error)
+	DeleteLibrary(id string) (string, error)
 }
 
 func NewLibraryService(library database.ILibrary) *LibraryService {
 	return &LibraryService{library: library}
 }
 
-func (s *LibraryService) GetLibraryByUser(userID string) ([]byte, error) {
+func (s *LibraryService) GetLibraryByUser(userID string) ([]database.Library, error) {
 	libraries, err := s.library.GetLibrariesByUser(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	jsonM, err := json.Marshal(libraries)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return libraries, nil
 }
 
 
-func (s *LibraryService) CreateLibrary(library database.Library) ([]byte, error) {
+func (s *LibraryService) CreateLibrary(library database.Library) (string, error) {
 	err := s.library.CreateLibrary(library)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Library created"), nil
+	return "Library created", nil
 }
 
-func (s *LibraryService) AddGameToLibraryFromUser(library database.Library) ([]byte, error) {
+func (s *LibraryService) AddGameToLibraryFromUser(library database.Library) (string, error) {
 	err := s.library.AddGameToLibraryFromUser(library)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Game added to library"), nil
+	return "Game added to library", nil
 }
 
-func (s *LibraryService) DeleteLibrary(id string) ([]byte, error) {
+func (s *LibraryService) DeleteLibrary(id string) (string, error) {
 	err := s.library.DeleteLibrary(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Library deleted"), nil
+	return "Library deleted", nil
 }

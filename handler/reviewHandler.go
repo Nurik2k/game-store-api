@@ -20,22 +20,13 @@ func NewReviewHandler(review *service.ReviewService) *ReviewHandler {
 func (rh *ReviewHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/reviews" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
-
 	reviews, err := rh.review.GetReviews()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonM , err := json.Marshal(reviews)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,26 +34,11 @@ func (rh *ReviewHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(reviews)
+	w.Write(jsonM)
 }
 
 func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/review/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "This request not GET!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 
@@ -72,30 +48,21 @@ func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsoM, err := json.Marshal(review)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(review)
+	w.Write(jsoM)
 }
 
 func (rh *ReviewHandler) CreateReview(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/create-review" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "This request not POST!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var review database.Review
 	err := json.NewDecoder(r.Body).Decode(&review)
@@ -110,30 +77,21 @@ func (rh *ReviewHandler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonM, err := json.Marshal(reviews)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(reviews)
+	w.Write(jsonM)
 }
 
 func (rh *ReviewHandler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	defer r.Body.Close()
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/update-review/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodPut {
-		http.Error(w, "This request not PUT!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var review database.Review
 	err := json.NewDecoder(r.Body).Decode(&review)
@@ -142,7 +100,13 @@ func (rh *ReviewHandler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reviews, err := rh.review.UpdateReview(review)
+	editedReview, err := rh.review.UpdateReview(review)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonM, err := json.Marshal(editedReview)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -150,26 +114,11 @@ func (rh *ReviewHandler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(reviews)
+	w.Write(jsonM)
 }
 
 func (rh *ReviewHandler) DeleteReview(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if r.URL.Path != "/api/v1/delete-review/{id}" {
-		http.Error(w, "404 Page not found!", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodDelete {
-		http.Error(w, "This request not DELETE!", http.StatusMethodNotAllowed)
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 
@@ -179,9 +128,15 @@ func (rh *ReviewHandler) DeleteReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonM, err := json.Marshal(reviews)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(reviews)
+	w.Write(jsonM)
 }
 
 func (rh *ReviewHandler) reviewRoutes() *mux.Router {

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"game-store-api/database"
 )
 
@@ -10,43 +9,38 @@ type FavoriteService struct {
 }
 
 type IFavoriteService interface {
-	GetFavoriteGamesByUser(userID string) ([]byte, error)
-	AddFavoriteGameToUser(favorite database.FavoriteGame) ([]byte, error)
-	DeleteFavoriteGameFromUser(id string) ([]byte, error)
+	GetFavoriteGamesByUser(userID string) ([]database.FavoriteGame, error)
+	AddFavoriteGameToUser(favorite database.FavoriteGame) (string, error)
+	DeleteFavoriteGameFromUser(id string) (string, error)
 }
 
 func NewFavoriteService(favorite database.IFavoriteGame) *FavoriteService {
 	return &FavoriteService{favorite: favorite}
 }
 
-func (s *FavoriteService) GetFavoriteGamesByUser(userID string) ([]byte, error) {
+func (s *FavoriteService) GetFavoriteGamesByUser(userID string) ([]database.FavoriteGame, error) {
 	favoriteGame, err := s.favorite.GetFavoriteGamesByUser(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	jsonM, err := json.Marshal(favoriteGame)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonM, nil
+	return favoriteGame, nil	
 }
 
-func (s *FavoriteService) AddFavoriteGameToUser(favorite database.FavoriteGame) ([]byte, error) {
+func (s *FavoriteService) AddFavoriteGameToUser(favorite database.FavoriteGame) (string, error) {
 	err := s.favorite.AddFavoriteGameToUser(favorite)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Favorite added"), nil
+	return "Favorite added", nil
 }
 
-func (s *FavoriteService) DeleteFavoriteGameFromUser(id string) ([]byte, error) {
+func (s *FavoriteService) DeleteFavoriteGameFromUser(id string) (string, error) {
 	err := s.favorite.DeleteFavoriteGameFromUser(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte("Favorite deleted"), nil
+	return "Favorite deleted", nil
 }

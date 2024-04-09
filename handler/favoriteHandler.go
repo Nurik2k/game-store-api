@@ -5,8 +5,6 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 type FavoriteHandler struct {
@@ -88,14 +86,4 @@ func (h *FavoriteHandler) DeleteFavorite(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
-}
-
-func (h *FavoriteHandler) favoriteRoutes() *mux.Router {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/favorite-games/{user_id}", h.GetFavorites).Methods("GET")
-	router.HandleFunc("/api/v1/add-favorite", h.AddFavorite).Methods("POST")
-	router.HandleFunc("/api/v1/delete-favorite", h.DeleteFavorite).Methods("DELETE")
-
-	return router
 }

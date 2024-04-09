@@ -5,8 +5,6 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 type LibraryHandler struct {
@@ -118,15 +116,4 @@ func (l *LibraryHandler) DeleteLibrary(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
-}
-
-func (l *LibraryHandler) libraryRoutes()  *mux.Router {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/library/{user_id}", l.GetLibrariesByUser).Methods("GET")
-	router.HandleFunc("/api/v1/create-library", l.CreateLibrary).Methods("POST")
-	router.HandleFunc("/api/v1/add-library", l.AddGameToLibraryFromUser).Methods("POST")
-	router.HandleFunc("/api/v1/delete-library/{id}", l.DeleteLibrary).Methods("DELETE")
-
-	return router
 }

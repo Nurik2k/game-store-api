@@ -5,8 +5,6 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 type GenreHandler struct {
@@ -139,14 +137,3 @@ func (g *GenreHandler) DeleteGenre(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonM)
 }
 
-func (g *GenreHandler) genreRoutes() *mux.Router {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/genres", g.GetGenres).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/genre/{id}", g.GetGenre).Methods("GET" , "OPTIONS")
-	router.HandleFunc("/api/v1/create-genre", g.CreateGenre).Methods("POST" , "OPTIONS")
-	router.HandleFunc("/api/v1/update-genre/{id}", g.UpdateGenre).Methods("PUT" , "OPTIONS")
-	router.HandleFunc("/api/v1/delete-genre/{id}", g.DeleteGenre).Methods("DELETE" , "OPTIONS")
-
-	return router
-}

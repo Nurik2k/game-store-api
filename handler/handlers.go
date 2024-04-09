@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -41,8 +42,16 @@ func enableCors(w http.ResponseWriter, method string) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 }
 
+func LogRequest(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        log.Printf("Request: %s %s", r.Method, r.URL.Path)
+        next.ServeHTTP(w, r)
+    })
+}
 func (h *Handler) Routes() *mux.Router {
 	r:= mux.NewRouter()
+
+	r.Use(LogRequest)
 
 	r.HandleFunc("/api/v1/games", h.game.GetGames).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc("/api/v1/game/{id}", h.game.GetGame).Methods(http.MethodGet, http.MethodOptions)

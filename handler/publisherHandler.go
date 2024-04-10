@@ -5,6 +5,8 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type PublisherHandler struct {
@@ -135,4 +137,12 @@ func (p *PublisherHandler) DeletePublisher(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
+}
+
+func (p *PublisherHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("", p.GetPublishers).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", p.GetPublisher).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("", p.CreatePublisher).Methods(http.MethodPost, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", p.UpdatePublisher).Methods(http.MethodPut, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", p.DeletePublisher).Methods(http.MethodDelete, http.MethodOptions)
 }

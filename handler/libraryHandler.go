@@ -5,6 +5,8 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type LibraryHandler struct {
@@ -15,7 +17,7 @@ func NewLibraryHandler(library *service.LibraryService) *LibraryHandler {
 	return &LibraryHandler{library: library}
 }
 
-func (l *LibraryHandler) GetLibrariesByUser(w http.ResponseWriter, r *http.Request) {
+func (l *LibraryHandler) GetLibraryByUser(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
 	userID := r.URL.Query().Get("user_id")
@@ -116,4 +118,11 @@ func (l *LibraryHandler) DeleteLibrary(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
+}
+
+func (l *LibraryHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("/{id}", l.GetLibraryByUser).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("", l.CreateLibrary).Methods(http.MethodPost, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", l.AddGameToLibraryFromUser).Methods(http.MethodPut, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", l.DeleteLibrary).Methods(http.MethodDelete, http.MethodOptions)
 }

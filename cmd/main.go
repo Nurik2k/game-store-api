@@ -45,7 +45,7 @@ func main() {
 
 	r := handler.Routes()
 
-	err = http.ListenAndServe(":8080", r)
+	err = http.ListenAndServe(":8085", r)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -56,7 +56,7 @@ func main() {
 func ConnectDB() (*pgxpool.Pool, error) {
 	ctx := context.Background()
 
-	config, err := pgxpool.ParseConfig("postgres://game_user:p@55word@localhost:5432/sso?sslmode=disable")
+	config, err := pgxpool.ParseConfig("postgres://game_user:p@55word@localhost:5432/game-data?sslmode=disable")
 	if err != nil {
 		return nil, err
 	}

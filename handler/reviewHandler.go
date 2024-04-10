@@ -5,6 +5,8 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type ReviewHandler struct {
@@ -135,4 +137,11 @@ func (rh *ReviewHandler) DeleteReview(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
+}
+
+func (rh *ReviewHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("/{id}", rh.GetReview).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("", rh.CreateReview).Methods(http.MethodPost, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", rh.UpdateReview).Methods(http.MethodPut, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", rh.DeleteReview).Methods(http.MethodDelete, http.MethodOptions)
 }

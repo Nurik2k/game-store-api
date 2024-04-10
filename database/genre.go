@@ -12,15 +12,15 @@ type genreDb struct {
 }
 
 type Genre struct {
-	ID        string       `db:"genre_id"`
+	ID        int       `db:"genre_id"`
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 }
 
 type IGenre interface {
 	GetGenres() ([]Genre, error)
-	GetGenre(id string) (Genre, error)
-	CreateGenre(genre Genre) error
+	GetGenre(id int) (Genre, error)
+	CreateGenre(genre Genre) (string, error)
 	UpdateGenre(genre Genre) error
 	DeleteGenre(id string) error
 }
@@ -47,7 +47,7 @@ func (db *genreDb) GetGenres() ([]Genre, error) {
 	return genres, nil
 }
 
-func (db *genreDb) GetGenre(id string) (Genre, error) {
+func (db *genreDb) GetGenre(id int) (Genre, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
@@ -60,13 +60,13 @@ func (db *genreDb) GetGenre(id string) (Genre, error) {
 	return genre, nil
 }
 
-func (db *genreDb) CreateGenre(genre Genre) error {
+func (db *genreDb) CreateGenre(genre Genre) (string, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
 	queryRow := `INSERT INTO genres (name) VALUES ($1)`
 	_, err := db.db.Exec(ctx, queryRow, genre.Name)
-	return err
+	return "game created", err
 }
 
 func (db *genreDb) UpdateGenre(genre Genre) error {

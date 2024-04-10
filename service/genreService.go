@@ -10,7 +10,7 @@ type GenreService struct {
 
 type IGenreService interface {
 	GetGenres() ([]database.Genre, error)
-	GetGenre(id string) (database.Genre, error)
+	GetGenre(id int) (database.Genre, error)
 	CreateGenre(genre database.Genre) (database.Genre, error)
 	UpdateGenre(genre database.Genre) (string, error)
 	DeleteGenre(id string) (string, error)
@@ -29,7 +29,7 @@ func (s *GenreService) GetGenres() ([]database.Genre, error) {
 	return genres, nil
 }
 
-func (s *GenreService) GetGenre(id string) (database.Genre, error) {
+func (s *GenreService) GetGenre(id int) (database.Genre, error) {
 	genre, err := s.genre.GetGenre(id)
 	if err != nil {
 		return genre, err
@@ -38,18 +38,13 @@ func (s *GenreService) GetGenre(id string) (database.Genre, error) {
 	return genre, nil
 }
 
-func (s *GenreService) CreateGenre(genre database.Genre) (database.Genre, error) {
-	err := s.genre.CreateGenre(genre)
+func (s *GenreService) CreateGenre(genre database.Genre) (string, error) {
+	msg,err := s.genre.CreateGenre(genre)
 	if err != nil {
-		return genre, err
-	}
-	
-	genre, err = s.genre.GetGenre(genre.ID)
-	if err != nil {
-		return genre, err
+		return "", err
 	}
 
-	return genre, nil
+	return msg, nil
 }
 func (s *GenreService) UpdateGenre(genre database.Genre) (string, error) {
 	err := s.genre.UpdateGenre(genre)

@@ -5,6 +5,8 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type PlatformHandler struct {
@@ -135,4 +137,12 @@ func (p *PlatformHandler) DeletePlatform(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
+}
+
+func (p *PlatformHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("", p.GetPlatforms).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", p.GetPlatform).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("", p.CreatePlatform).Methods(http.MethodPost, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", p.UpdatePlatform).Methods(http.MethodPut, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", p.DeletePlatform).Methods(http.MethodDelete, http.MethodOptions)
 }

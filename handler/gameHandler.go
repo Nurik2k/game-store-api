@@ -5,6 +5,8 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type GameHandler struct {
@@ -137,4 +139,12 @@ func (g *GameHandler) DeleteGame(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonM)
 }	
+
+func (g *GameHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("", g.GetGames).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", g.GetGame).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("", g.CreateGame).Methods(http.MethodPost, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", g.UpdateGame).Methods(http.MethodPut, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", g.DeleteGame).Methods(http.MethodDelete, http.MethodOptions)
+}
 

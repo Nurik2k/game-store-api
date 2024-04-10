@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -15,6 +17,13 @@ type Handler struct {
 	library *LibraryHandler
 	platform *PlatformHandler
 	publisher *PublisherHandler
+}
+
+type TokenInfo struct {
+    Status  string   `json:"status"`
+    Message string   `json:"message"`
+    UserID  string   `json:"user_id"`
+    Roles   []string `json:"roles"`
 }
 
 func NewHandler(
@@ -48,49 +57,79 @@ func LogRequest(next http.Handler) http.Handler {
         next.ServeHTTP(w, r)
     })
 }
+
+func RequireAuth(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		tokenInfo := verifyToken(r.Header.Get("Authorization"))
+		if tokenInfo.Status != "success" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (h *Handler) Routes() *mux.Router {
 	r:= mux.NewRouter()
 
 	r.Use(LogRequest)
+	r.Use(RequireAuth)
 
-	r.HandleFunc("/api/v1/games", h.game.GetGames).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/game/{id}", h.game.GetGame).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/create-game", h.game.CreateGame).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/update-game/{id}", h.game.UpdateGame).Methods(http.MethodPut, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-game/{id}", h.game.DeleteGame).Methods(http.MethodDelete, http.MethodOptions)
+	subRouterGame := r.PathPrefix("/api/v1/game").Subrouter()
+	subRouterGenre := r.PathPrefix("/api/v1/genre").Subrouter()
+	subRouterLibrary := r.PathPrefix("/api/v1/library").Subrouter()
+	subRouterPlatform := r.PathPrefix("/api/v1/platform").Subrouter()
+	subRouterPublisher := r.PathPrefix("/api/v1/publisher").Subrouter()
+	subRouterFavorite := r.PathPrefix("/api/v1/favorite").Subrouter()
+	subRouterReview := r.PathPrefix("/api/v1/review").Subrouter()
 
-	r.HandleFunc("/api/v1/genres", h.genre.GetGenres).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/genre/{id}", h.genre.GetGenre).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/create-genre", h.genre.CreateGenre).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/update-genre/{id}", h.genre.UpdateGenre).Methods(http.MethodPut, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-genre/{id}", h.genre.DeleteGenre).Methods(http.MethodDelete, http.MethodOptions)
-
-	r.HandleFunc("/api/v1/library/{user_id}", h.library.GetLibrariesByUser).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/create-library", h.library.CreateLibrary).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/add-library", h.library.AddGameToLibraryFromUser).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-library/{id}", h.library.DeleteLibrary).Methods(http.MethodDelete, http.MethodOptions)
-
-	r.HandleFunc("/api/v1/publishers", h.publisher.GetPublishers).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/publisher/{id}", h.publisher.GetPublisher).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/create-publisher", h.publisher.CreatePublisher).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/update-publisher/{id}", h.publisher.UpdatePublisher).Methods(http.MethodPut, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-publisher/{id}", h.publisher.DeletePublisher).Methods(http.MethodDelete, http.MethodOptions)
-
-	r.HandleFunc("/api/v1/platforms", h.platform.GetPlatforms).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/platform/{id}", h.platform.GetPlatform).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/create-platform", h.platform.CreatePlatform).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/update-platform/{id}", h.platform.UpdatePlatform).Methods(http.MethodPut, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-platform/{id}", h.platform.DeletePlatform).Methods(http.MethodDelete, http.MethodOptions)
-
-	r.HandleFunc("/api/v1/reviews", h.review.GetReviews).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/review/{id}", h.review.GetReview).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/create-review", h.review.CreateReview).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/update-review/{id}", h.review.UpdateReview).Methods(http.MethodPut, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-review/{id}", h.review.DeleteReview).Methods(http.MethodDelete, http.MethodOptions)
-
-	r.HandleFunc("/api/v1/favorite", h.favorite.GetFavorites).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc("/api/v1/favorite/{id}", h.favorite.AddFavorite).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/api/v1/delete-favorite/{id}", h.favorite.DeleteFavorite).Methods(http.MethodDelete, http.MethodOptions)
+	h.game.Routes(subRouterGame)
+	h.genre.Routes(subRouterGenre)
+	h.library.Routes(subRouterLibrary)
+	h.platform.Routes(subRouterPlatform)
+	h.publisher.Routes(subRouterPublisher)
+	h.favorite.Routes(subRouterFavorite)
+	h.review.Routes(subRouterReview)
 
 	return r
+}
+
+func verifyToken(token string) TokenInfo {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://sso:8080/api/v1/verify-token", nil)
+	if err != nil {
+		log.Println("Failed to create request for token verification:", err)
+		return TokenInfo{Status: "error", Message: "Failed to create request for token verification"}
+	}
+
+	req.Header.Add("Authorization", token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Failed to verify token:", err)
+		return TokenInfo{Status: "error", Message: "Failed to verify token"}
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Failed to read token verification response body:", err)
+		return TokenInfo{Status: "error", Message: "Failed to read token verification response body"}
+	}
+
+	var tokenInfo TokenInfo
+	err = json.Unmarshal(body, &tokenInfo)
+	if err != nil {
+		log.Println("Failed to unmarshal token verification response:", err)
+		return TokenInfo{Status: "error", Message: "Failed to unmarshal token verification response"}
+	}
+
+	return tokenInfo
 }

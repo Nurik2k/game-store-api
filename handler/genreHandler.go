@@ -2,9 +2,13 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type GenreHandler struct {
@@ -38,8 +42,19 @@ func (g *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 func (g *GenreHandler) GetGenre(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	
 
+
+	fmt.Println(params)
+
+	id, err := strconv.Atoi(params["id"])
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	
 	genre, err := g.genre.GetGenre(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -137,3 +152,10 @@ func (g *GenreHandler) DeleteGenre(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonM)
 }
 
+func (g *GenreHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("", g.GetGenres).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", g.GetGenre).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("", g.CreateGenre).Methods(http.MethodPost, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", g.UpdateGenre).Methods(http.MethodPut, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", g.DeleteGenre).Methods(http.MethodDelete, http.MethodOptions)
+}

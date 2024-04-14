@@ -5,6 +5,7 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -40,7 +41,12 @@ func (rh *ReviewHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	review, err := rh.review.GetReview(id)
 	if err != nil {
@@ -120,7 +126,12 @@ func (rh *ReviewHandler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 func (rh *ReviewHandler) DeleteReview(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	reviews, err := rh.review.DeleteReview(id)
 	if err != nil {
@@ -140,8 +151,12 @@ func (rh *ReviewHandler) DeleteReview(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rh *ReviewHandler) Routes(subRouter *mux.Router) {
+	subRouter.HandleFunc("", rh.GetReviews).Methods(http.MethodGet, http.MethodOptions)
 	subRouter.HandleFunc("/{id}", rh.GetReview).Methods(http.MethodGet, http.MethodOptions)
-	subRouter.HandleFunc("", rh.CreateReview).Methods(http.MethodPost, http.MethodOptions)
-	subRouter.HandleFunc("/{id}", rh.UpdateReview).Methods(http.MethodPut, http.MethodOptions)
-	subRouter.HandleFunc("/{id}", rh.DeleteReview).Methods(http.MethodDelete, http.MethodOptions)
+
+	authRouter := subRouter.PathPrefix("/admin").Subrouter()
+	authRouter.Use(RequireAuth)
+	authRouter.HandleFunc("", rh.CreateReview).Methods(http.MethodPost, http.MethodOptions)
+	authRouter.HandleFunc("/{id}", rh.UpdateReview).Methods(http.MethodPut, http.MethodOptions)
+	authRouter.HandleFunc("/{id}", rh.DeleteReview).Methods(http.MethodDelete, http.MethodOptions)
 }

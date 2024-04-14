@@ -10,10 +10,10 @@ type PlatformService struct {
 
 type IPlatformService interface {
 	GetPlatforms() ([]database.Platform, error)
-	GetPlatform(id string) (database.Platform, error)
+	GetPlatform(id int) (database.Platform, error)
 	CreatePlatform(platform database.Platform) (string, error)
 	UpdatePlatform(platform database.Platform) (string, error)
-	DeletePlatform(id string) (string, error)
+	DeletePlatform(id int) (string, error)
 }
 
 func NewPlatformService(platform database.IPlatform) *PlatformService {
@@ -29,7 +29,7 @@ func (s *PlatformService) GetPlatforms() ([]database.Platform, error) {
 	return platforms, nil
 }
 
-func (s *PlatformService) GetPlatform(id string) (database.Platform, error) {
+func (s *PlatformService) GetPlatform(id int) (database.Platform, error) {
 	platform, err := s.platform.GetPlatform(id)
 	if err != nil {
 		return platform, err
@@ -56,7 +56,7 @@ func (s *PlatformService) UpdatePlatform(platform database.Platform) (string, er
 	return"Platform updated", nil
 }
 
-func (s *PlatformService) DeletePlatform(id string) (string, error) {
+func (s *PlatformService) DeletePlatform(id int) (string, error) {
 	err := s.platform.DeletePlatform(id)
 	if err != nil {
 		return "", err

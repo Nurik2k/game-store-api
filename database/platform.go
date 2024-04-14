@@ -12,17 +12,17 @@ type platformDb struct {
 }
 
 type Platform struct {
-	ID        string       `db:"platform_id"`
+	ID        int       `db:"platform_id"`
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 }
 
 type IPlatform interface {
 	GetPlatforms() ([]Platform, error)
-	GetPlatform(id string) (Platform, error)
+	GetPlatform(id int) (Platform, error)
 	CreatePlatform(platform Platform) error
 	UpdatePlatform(platform Platform) error
-	DeletePlatform(id string) error
+	DeletePlatform(id int) error
 }
 
 func (db *platformDb) GetPlatforms() ([]Platform, error) {
@@ -47,7 +47,7 @@ func (db *platformDb) GetPlatforms() ([]Platform, error) {
 	return platforms, nil
 }
 
-func (db *platformDb) GetPlatform(id string) (Platform, error) {
+func (db *platformDb) GetPlatform(id int) (Platform, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
@@ -78,7 +78,7 @@ func (db *platformDb) UpdatePlatform(platform Platform) error {
 	return err
 }
 
-func (db *platformDb) DeletePlatform(id string) error {
+func (db *platformDb) DeletePlatform(id int) error {
 	ctx := context.Background()
 	defer ctx.Done()
 

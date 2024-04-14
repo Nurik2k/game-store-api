@@ -12,33 +12,38 @@ type favoriteDb struct {
 }
 
 type FavoriteGame struct {
-	ID      string       `db:"favorite_id"`
+	ID      int       `db:"favorite_id"`
 	UserID  int       `db:"user_id"`
 	GameID  int       `db:"game_id"`
 	AddedAt time.Time `db:"added_at"`
 }
 
 type IFavoriteGame interface {
-	GetFavoriteGamesByUser(userID string) ([]FavoriteGame, error)
+	GetFavoriteGamesByUser(userID int) ([]Game, error)
 	AddFavoriteGameToUser(favorite FavoriteGame) error
-	DeleteFavoriteGameFromUser(id string) error
+	DeleteFavoriteGameFromUser(id int) error
 }
 
-func (db *favoriteDb) GetFavoriteGamesByUser(userID string) ([]FavoriteGame, error) {
+func (db *favoriteDb) GetFavoriteGamesByUser(userID int) ([]Game, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
-	queryRow := `SELECT fav_id, user_id, game_id, added_at FROM favorites WHERE user_id = $1`
+	queryRow := `select g.name, g.description, ge.name as genre, p.name as publisher, pl.name as platform from games g
+	join favorites_games f on f.game_id = g.game_id
+	join genres ge on ge.genre_id = g.genre_id
+	join publisher p on p.publisher_id = g.publisher_id
+	join platforms pl on pl.platform_id = g.platform_id
+	where f.user_id = $1`
 	rows, err := db.db.Query(ctx, queryRow, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var favorites []FavoriteGame
+	var favorites []Game
 	for rows.Next() {
-		var favorite FavoriteGame
-		if err := rows.Scan(&favorite.ID, &favorite.UserID, &favorite.GameID, &favorite.AddedAt); err != nil {
+		var favorite Game
+		if err := rows.Scan(&favorite.Name, &favorite.Description, &favorite.GenreName, &favorite.PublisherName, &favorite.PlatformName); err != nil {
 			return nil, err
 		}
 		favorites = append(favorites, favorite)
@@ -55,7 +60,7 @@ func (db *favoriteDb) AddFavoriteGameToUser(favorite FavoriteGame) error {
 	return err
 }
 
-func (db *favoriteDb) DeleteFavoriteGameFromUser(id string) error {
+func (db *favoriteDb) DeleteFavoriteGameFromUser(id int) error {
 	ctx := context.Background()
 	defer ctx.Done()
 
@@ -63,6 +68,8 @@ func (db *favoriteDb) DeleteFavoriteGameFromUser(id string) error {
 	_, err := db.db.Exec(ctx, queryRow, id)
 	return err
 }
+
+
 
 func NewFavoriteDb(db *pgxpool.Pool) (IFavoriteGame, error) {
 	

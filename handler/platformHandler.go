@@ -5,6 +5,7 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -40,7 +41,12 @@ func (p *PlatformHandler) GetPlatforms(w http.ResponseWriter, r *http.Request) {
 func (p *PlatformHandler) GetPlatform(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	platform, err := p.platform.GetPlatform(id)
 	if err != nil {
@@ -120,7 +126,12 @@ func (p *PlatformHandler) UpdatePlatform(w http.ResponseWriter, r *http.Request)
 func (p *PlatformHandler) DeletePlatform(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	platforms, err := p.platform.DeletePlatform(id)
 	if err != nil {
@@ -142,7 +153,10 @@ func (p *PlatformHandler) DeletePlatform(w http.ResponseWriter, r *http.Request)
 func (p *PlatformHandler) Routes(subRouter *mux.Router) {
 	subRouter.HandleFunc("", p.GetPlatforms).Methods(http.MethodGet, http.MethodOptions)
 	subRouter.HandleFunc("/{id}", p.GetPlatform).Methods(http.MethodGet, http.MethodOptions)
-	subRouter.HandleFunc("", p.CreatePlatform).Methods(http.MethodPost, http.MethodOptions)
-	subRouter.HandleFunc("/{id}", p.UpdatePlatform).Methods(http.MethodPut, http.MethodOptions)
-	subRouter.HandleFunc("/{id}", p.DeletePlatform).Methods(http.MethodDelete, http.MethodOptions)
+
+	authRouter := subRouter.PathPrefix("/admin").Subrouter()
+	authRouter.Use(RequireAuth)
+	authRouter.HandleFunc("", p.CreatePlatform).Methods(http.MethodPost, http.MethodOptions)
+	authRouter.HandleFunc("/{id}", p.UpdatePlatform).Methods(http.MethodPut, http.MethodOptions)
+	authRouter.HandleFunc("/{id}", p.DeletePlatform).Methods(http.MethodDelete, http.MethodOptions)
 }

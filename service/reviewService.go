@@ -10,10 +10,10 @@ type ReviewService struct {
 
 type IReviewService interface {
 	GetReviews() ([]database.Review, error)
-	GetReview(id string) (database.Review, error)
+	GetReview(id int) (database.Review, error)
 	CreateReview(review database.Review) (string, error)
 	UpdateReview(review database.Review) (string, error)
-	DeleteReview(id string) (string, error)
+	DeleteReview(id int) (string, error)
 }
 
 func NewReviewService(review database.IReview) *ReviewService {
@@ -29,7 +29,7 @@ func (s *ReviewService) GetReviews() ([]database.Review, error) {
 	return reviews, nil
 }
 
-func (s *ReviewService) GetReview(id string) (database.Review, error) {
+func (s *ReviewService) GetReview(id int) (database.Review, error) {
 	review, err := s.review.GetReview(id)
 	if err != nil {
 		return review, err
@@ -55,7 +55,7 @@ func (s *ReviewService) UpdateReview(review database.Review) (string, error) {
 	return "Review updated", nil
 }
 
-func (s *ReviewService) DeleteReview(id string) (string, error) {
+func (s *ReviewService) DeleteReview(id int) (string, error) {
 	err := s.review.DeleteReview(id)
 	if err != nil {
 		return "", err

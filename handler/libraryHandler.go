@@ -5,6 +5,7 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -20,9 +21,14 @@ func NewLibraryHandler(library *service.LibraryService) *LibraryHandler {
 func (l *LibraryHandler) GetLibraryByUser(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	userID := r.URL.Query().Get("user_id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	games, err := l.library.GetLibraryByUser(userID)
+	games, err := l.library.GetLibraryByUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -101,7 +107,12 @@ func (l *LibraryHandler) AddGameToLibraryFromUser(w http.ResponseWriter, r *http
 func (l *LibraryHandler) DeleteLibrary(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	games, err := l.library.DeleteLibrary(id)
 	if err != nil {

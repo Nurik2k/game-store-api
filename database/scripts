@@ -1,0 +1,17 @@
+SELECT publisher_id, name, added_at
+	FROM public.publisher;
+
+insert into publisher(name) values('Nurik')
+insert into genres(name) values('18')
+insert into platforms(name) values('windows')
+
+insert into games(name, description, genre_id, publisher_id, platform_id) values('RDR2', 'Red dead redemption 2', 1, 1, 1)
+insert into favorites_games(user_id, game_id) values(1, 3)
+delete from favorites_games where game_id = 2
+
+select g.name, g.description, ge.name as genre, p.name as publisher, pl.name as platform from games g
+join favorites_games f on f.game_id = g.game_id
+join genres ge on ge.genre_id = g.genre_id
+join publisher p on p.publisher_id = g.publisher_id
+join platforms pl on pl.platform_id = g.platform_id
+where f.user_id = 1 and g.name ilike '%%'

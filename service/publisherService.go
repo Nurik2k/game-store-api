@@ -10,10 +10,10 @@ type PublisherSerice struct {
 
 type IPublisherService interface {
 	GetPublishers() ([]database.Publisher, error)
-	GetPublisher(id string) (database.Publisher, error)
+	GetPublisher(id int) (database.Publisher, error)
 	CreatePublisher(publisher database.Publisher) (string, error)
 	UpdatePublisher(publisher database.Publisher) (string, error)
-	DeletePublisher(id string) (string, error)
+	DeletePublisher(id int) (string, error)
 }
 
 func NewPublisherService(publisher database.IPublisher) *PublisherSerice {
@@ -29,7 +29,7 @@ func (s *PublisherSerice) GetPublishers() ([]database.Publisher, error) {
 	return publishers, nil
 }
 
-func (s *PublisherSerice) GetPublisher(id string) (database.Publisher, error) {
+func (s *PublisherSerice) GetPublisher(id int) (database.Publisher, error) {
 	publisher, err := s.publisher.GetPublisher(id)
 	if err != nil {
 		return publisher, err
@@ -56,7 +56,7 @@ func (s *PublisherSerice) UpdatePublisher(publisher database.Publisher) (string,
 	return "Publisher updated", nil
 }
 
-func (s *PublisherSerice) DeletePublisher(id string) (string, error) {
+func (s *PublisherSerice) DeletePublisher(id int) (string, error) {
 	err := s.publisher.DeletePublisher(id)
 	if err != nil {
 		return "", err

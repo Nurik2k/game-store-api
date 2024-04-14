@@ -13,7 +13,7 @@ type IGenreService interface {
 	GetGenre(id int) (database.Genre, error)
 	CreateGenre(genre database.Genre) (database.Genre, error)
 	UpdateGenre(genre database.Genre) (string, error)
-	DeleteGenre(id string) (string, error)
+	DeleteGenre(id int) (string, error)
 }
 
 func NewGenreService(genre database.IGenre) *GenreService {
@@ -55,7 +55,7 @@ func (s *GenreService) UpdateGenre(genre database.Genre) (string, error) {
 	return "Genre updated", nil
 }
 
-func (s *GenreService) DeleteGenre(id string) (string, error) {
+func (s *GenreService) DeleteGenre(id int) (string, error) {
 	err := s.genre.DeleteGenre(id)
 	if err != nil {
 		return "", err

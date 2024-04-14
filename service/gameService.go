@@ -10,10 +10,11 @@ type GameSerice struct {
 
 type IGameService interface {
 	GetGames() ([]database.Game, error)
-	GetGame(id string) (database.Game, error)
+	GetGame(id int) (database.Game, error)
+	GetGamesByGenre(query string) ([]database.Game, error)
 	CreateGame(game database.Game) (database.Game, error)
 	UpdateGame(game database.Game) (string, error)
-	DeleteGame(id string) (string, error)
+	DeleteGame(id int) (string, error)
 }
 
 func NewGameService(game database.IGame) *GameSerice {
@@ -29,7 +30,18 @@ func (s *GameSerice) GetGames() ([]database.Game, error) {
 	return games, nil
 }
 
-func (s *GameSerice) GetGame(id string) (database.Game, error) {
+func (s *GameSerice) GetGamesByGenre(query string) ([]database.Game, error) {
+	genre := "%" + query + "%"
+
+	games, err := s.game.GetGamesByGenre(genre)
+	if err != nil {
+		return nil, err
+	}
+
+	return games, nil
+}
+
+func (s *GameSerice) GetGame(id int) (database.Game, error) {
 	game, err := s.game.GetGame(id)
 	if err != nil {
 		return game, err
@@ -60,7 +72,7 @@ func (s *GameSerice) UpdateGame(game database.Game) (string, error) {
 	return "game updated", nil
 }
 
-func (s *GameSerice) DeleteGame(id string) (string, error) {
+func (s *GameSerice) DeleteGame(id int) (string, error) {
 	err := s.game.DeleteGame(id)
 	if err != nil {
 		return "", err

@@ -80,8 +80,7 @@ func (h *Handler) Routes() *mux.Router {
 	r:= mux.NewRouter()
 
 	r.Use(LogRequest)
-	r.Use(RequireAuth)
-
+	
 	subRouterGame := r.PathPrefix("/api/v1/game").Subrouter()
 	subRouterGenre := r.PathPrefix("/api/v1/genre").Subrouter()
 	subRouterLibrary := r.PathPrefix("/api/v1/library").Subrouter()
@@ -103,7 +102,7 @@ func (h *Handler) Routes() *mux.Router {
 
 func verifyToken(token string) TokenInfo {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://sso:8080/api/v1/verify-token", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/verify-token", nil)
 	if err != nil {
 		log.Println("Failed to create request for token verification:", err)
 		return TokenInfo{Status: "error", Message: "Failed to create request for token verification"}

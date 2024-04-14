@@ -22,7 +22,7 @@ type IGenre interface {
 	GetGenre(id int) (Genre, error)
 	CreateGenre(genre Genre) (string, error)
 	UpdateGenre(genre Genre) error
-	DeleteGenre(id string) error
+	DeleteGenre(id int) error
 }
 
 func (db *genreDb) GetGenres() ([]Genre, error) {
@@ -78,7 +78,7 @@ func (db *genreDb) UpdateGenre(genre Genre) error {
 	return err
 }
 
-func (db *genreDb) DeleteGenre(id string) error {
+func (db *genreDb) DeleteGenre(id int) error {
 	ctx := context.Background()
 	defer ctx.Done()
 

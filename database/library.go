@@ -11,20 +11,20 @@ type libraryDb struct {
 }
 
 type Library struct {
-	ID        string `db:"library_id"`
+	ID        int `db:"library_id"`
 	GameID    int `db:"game_id"`
 	UserID    int `db:"user_id"`
 	CreatedAt int `db:"created_at"`
 }
 
 type ILibrary interface {
-	GetLibrariesByUser(userID string) ([]Library, error)
+	GetLibrariesByUser(userID int) ([]Library, error)
 	CreateLibrary(library Library) error
 	AddGameToLibraryFromUser(library Library) error
-	DeleteLibrary(id string) error
+	DeleteLibrary(id int) error
 }
 
-func (db *libraryDb) GetLibrariesByUser(userID string) ([]Library, error) {
+func (db *libraryDb) GetLibrariesByUser(userID int) ([]Library, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
@@ -64,7 +64,7 @@ func (db *libraryDb) AddGameToLibraryFromUser(library Library) error {
 	return err
 }
 
-func (db *libraryDb) DeleteLibrary(id string) error {
+func (db *libraryDb) DeleteLibrary(id int) error {
 	ctx := context.Background()
 	defer ctx.Done()
 

@@ -12,7 +12,7 @@ type reviewDb struct {
 }
 
 type Review struct {
-	ID      string       `db:"review_id"`
+	ID      int       `db:"review_id"`
 	GameID  int       `db:"game_id"`
 	UserID  int       `db:"user_id"`
 	Rating  int       `db:"rating"`
@@ -22,10 +22,10 @@ type Review struct {
 
 type IReview interface {
 	GetReviews() ([]Review, error)
-	GetReview(id string) (Review, error)
+	GetReview(id int) (Review, error)
 	CreateReview(review Review) error
 	UpdateReview(review Review) error
-	DeleteReview(id string) error
+	DeleteReview(id int) error
 }
 
 func (db *reviewDb) GetReviews() ([]Review, error) {
@@ -50,7 +50,7 @@ func (db *reviewDb) GetReviews() ([]Review, error) {
 	return reviews, nil
 }
 
-func (db *reviewDb) GetReview(id string) (Review, error) {
+func (db *reviewDb) GetReview(id int) (Review, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
@@ -81,7 +81,7 @@ func (db *reviewDb) UpdateReview(review Review) error {
 	return err
 }
 
-func (db *reviewDb) DeleteReview(id string) error {
+func (db *reviewDb) DeleteReview(id int) error {
 	ctx := context.Background()
 	defer ctx.Done()
 

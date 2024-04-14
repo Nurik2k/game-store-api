@@ -9,17 +9,17 @@ type LibraryService struct {
 }
 
 type ILibraryService interface {
-	GetLibraryByUser(userID string) ([]database.Library, error)
+	GetLibraryByUser(userID int) ([]database.Library, error)
 	CreateLibrary(library database.Library) (string, error)
 	AddGameToLibraryFromUser(library database.Library) (string, error)
-	DeleteLibrary(id string) (string, error)
+	DeleteLibrary(id int) (string, error)
 }
 
 func NewLibraryService(library database.ILibrary) *LibraryService {
 	return &LibraryService{library: library}
 }
 
-func (s *LibraryService) GetLibraryByUser(userID string) ([]database.Library, error) {
+func (s *LibraryService) GetLibraryByUser(userID int) ([]database.Library, error) {
 	libraries, err := s.library.GetLibrariesByUser(userID)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (s *LibraryService) AddGameToLibraryFromUser(library database.Library) (str
 	return "Game added to library", nil
 }
 
-func (s *LibraryService) DeleteLibrary(id string) (string, error) {
+func (s *LibraryService) DeleteLibrary(id int) (string, error) {
 	err := s.library.DeleteLibrary(id)
 	if err != nil {
 		return "", err

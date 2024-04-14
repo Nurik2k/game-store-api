@@ -11,17 +11,17 @@ type publisherDb struct {
 }
 
 type Publisher struct {
-	ID        string    `db:"publisher_id"`
+	ID        int    `db:"publisher_id"`
 	Name      string `db:"name"`
 	CreatedAt int    `db:"created_at"`
 }
 
 type IPublisher interface {
 	GetPublishers() ([]Publisher, error)
-	GetPublisher(id string) (Publisher, error)
+	GetPublisher(id int) (Publisher, error)
 	CreatePublisher(publisher Publisher) error
 	UpdatePublisher(publisher Publisher) error
-	DeletePublisher(id string) error
+	DeletePublisher(id int) error
 }
 
 func (db *publisherDb) GetPublishers() ([]Publisher, error) {
@@ -46,7 +46,7 @@ func (db *publisherDb) GetPublishers() ([]Publisher, error) {
 	return publishers, nil
 }
 
-func (db *publisherDb) GetPublisher(id string) (Publisher, error) {
+func (db *publisherDb) GetPublisher(id int) (Publisher, error) {
 	ctx := context.Background()
 	defer ctx.Done()
 
@@ -77,7 +77,7 @@ func (db *publisherDb) UpdatePublisher(publisher Publisher) error {
 	return err
 }
 
-func (db *publisherDb) DeletePublisher(id string) error {
+func (db *publisherDb) DeletePublisher(id int) error {
 	ctx := context.Background()
 	defer ctx.Done()
 

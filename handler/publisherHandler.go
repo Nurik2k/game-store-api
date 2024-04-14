@@ -5,6 +5,7 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -40,7 +41,12 @@ func (p *PublisherHandler) GetPublishers(w http.ResponseWriter, r *http.Request)
 func (p *PublisherHandler) GetPublisher(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	publisher, err := p.publisherService.GetPublisher(id)
 	if err != nil {
@@ -120,7 +126,12 @@ func (p *PublisherHandler) UpdatePublisher(w http.ResponseWriter, r *http.Reques
 func (p *PublisherHandler) DeletePublisher(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	publishers, err := p.publisherService.DeletePublisher(id)
 	if err != nil {
@@ -142,7 +153,10 @@ func (p *PublisherHandler) DeletePublisher(w http.ResponseWriter, r *http.Reques
 func (p *PublisherHandler) Routes(subRouter *mux.Router) {
 	subRouter.HandleFunc("", p.GetPublishers).Methods(http.MethodGet, http.MethodOptions)
 	subRouter.HandleFunc("/{id}", p.GetPublisher).Methods(http.MethodGet, http.MethodOptions)
-	subRouter.HandleFunc("", p.CreatePublisher).Methods(http.MethodPost, http.MethodOptions)
-	subRouter.HandleFunc("/{id}", p.UpdatePublisher).Methods(http.MethodPut, http.MethodOptions)
-	subRouter.HandleFunc("/{id}", p.DeletePublisher).Methods(http.MethodDelete, http.MethodOptions)
+
+	authRouter := subRouter.PathPrefix("/admin").Subrouter()
+	authRouter.Use(RequireAuth)
+	authRouter.HandleFunc("", p.CreatePublisher).Methods(http.MethodPost, http.MethodOptions)
+	authRouter.HandleFunc("/{id}", p.UpdatePublisher).Methods(http.MethodPut, http.MethodOptions)
+	authRouter.HandleFunc("/{id}", p.DeletePublisher).Methods(http.MethodDelete, http.MethodOptions)
 }

@@ -9,16 +9,16 @@ type FavoriteService struct {
 }
 
 type IFavoriteService interface {
-	GetFavoriteGamesByUser(userID string) ([]database.FavoriteGame, error)
+	GetFavoriteGamesByUser(userID int) ([]database.Game, error)
 	AddFavoriteGameToUser(favorite database.FavoriteGame) (string, error)
-	DeleteFavoriteGameFromUser(id string) (string, error)
+	DeleteFavoriteGameFromUser(id int) (string, error)
 }
 
 func NewFavoriteService(favorite database.IFavoriteGame) *FavoriteService {
 	return &FavoriteService{favorite: favorite}
 }
 
-func (s *FavoriteService) GetFavoriteGamesByUser(userID string) ([]database.FavoriteGame, error) {
+func (s *FavoriteService) GetFavoriteGamesByUser(userID int) ([]database.Game, error) {
 	favoriteGame, err := s.favorite.GetFavoriteGamesByUser(userID)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (s *FavoriteService) AddFavoriteGameToUser(favorite database.FavoriteGame) 
 	return "Favorite added", nil
 }
 
-func (s *FavoriteService) DeleteFavoriteGameFromUser(id string) (string, error) {
+func (s *FavoriteService) DeleteFavoriteGameFromUser(id int) (string, error) {
 	err := s.favorite.DeleteFavoriteGameFromUser(id)
 	if err != nil {
 		return "", err

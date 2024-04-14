@@ -5,6 +5,7 @@ import (
 	"game-store-api/database"
 	"game-store-api/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -17,12 +18,17 @@ func NewFavoriteHandler(favorite *service.FavoriteService) *FavoriteHandler {
 	return &FavoriteHandler{favorite: favorite}
 }
 
-func (h *FavoriteHandler) GetFavorites(w http.ResponseWriter, r *http.Request) {
+func (h *FavoriteHandler) GetFavoriteGamesByUser(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	userID := r.URL.Query().Get("user_id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	favoriteGame, err := h.favorite.GetFavoriteGamesByUser(userID)
+	favoriteGame, err := h.favorite.GetFavoriteGamesByUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,7 +77,12 @@ func (h *FavoriteHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 func (h *FavoriteHandler) DeleteFavorite(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r.Method)
 
-	id := r.URL.Query().Get("id")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	games, err := h.favorite.DeleteFavoriteGameFromUser(id)
 	if err != nil {
@@ -91,7 +102,7 @@ func (h *FavoriteHandler) DeleteFavorite(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *FavoriteHandler) Routes(subRouter *mux.Router) {
-	subRouter.HandleFunc("", h.GetFavorites).Methods(http.MethodGet, http.MethodOptions)
+	subRouter.HandleFunc("/{id}", h.GetFavoriteGamesByUser).Methods(http.MethodGet, http.MethodOptions)
 	subRouter.HandleFunc("/{id}", h.AddFavorite).Methods(http.MethodPost, http.MethodOptions)
 	subRouter.HandleFunc("/{id}", h.DeleteFavorite).Methods(http.MethodDelete, http.MethodOptions)
 }
